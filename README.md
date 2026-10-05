@@ -12,6 +12,7 @@ Este projeto implementa um sistema completo de agente de vendas baseado em visã
 - **Agente de IA**: Usa LLaMA 3 (via Ollama) para gerar argumentos de venda persuasivos
 - **Processamento Local**: Funciona completamente offline sem dependências de APIs externas
 - **API FastAPI**: Endpoints prontos para integração em aplicações web
+- **Frontend Web**: Interface em HTML/CSS/JS via Flask para upload de imagens e exibição dos resultados
 
 ## 🎯 Caso de Uso
 
@@ -27,8 +28,18 @@ O sistema é ideal para:
 ```
 ┌──────────────────────────────────────────────────────┐
 │         Imagem Enviada pelo Usuário                 │
-│          (upload via API FastAPI)                    │
+│          (upload via interface web)                  │
 └────────────┬─────────────────────────────────────────┘
+             │
+      ┌──────▼──────────┐
+      │  Frontend       │ (Flask + HTML/CSS)
+      │  dsa_frontend.py │
+      └──────┬──────────┘
+             │
+      ┌──────▼──────────────────────┐
+      │  FastAPI API                │
+      │  /dsa_processa_image        │
+      └──────┬──────────────────────┘
              │
       ┌──────▼──────────┐
       │  Embedding Model│ (Vision - ex: CLIP, ViT)
@@ -70,11 +81,15 @@ O sistema é ideal para:
 dsa_RAG_multimodal_text_image/
 ├── dsa_api.py                     # Aplicação FastAPI com endpoints
 ├── dsa_database.py                # Configuração do Milvus e embeddings
-├── dsa_frontend.py                # Interface Streamlit
+├── dsa_frontend.py                # Frontend Flask + HTML/CSS
+├── templates/                     # Templates HTML usados pelo Flask
+│   └── index.html
+├── static/                        # Arquivos estáticos do frontend (CSS/JS/imagens)
+│   ├── css/
+│   ├── js/
+│   └── uploads/
 ├── docker-compose.yml             # Orchestração de containers (Milvus + etcd)
 ├── requirements.txt               # Dependências Python
-├── static/                        # Imagens do catálogo (não está no repositório)
-│   └── produtos/
 └── README.md                     # Este arquivo
 ```
 
@@ -166,9 +181,9 @@ ls -la static/produtos/
 mkdir -p static/produtos
 ```
 
-### 6️⃣ Executar a Aplicação (Sequência de Terminais)
+### 6️⃣ Executar a Aplicação (Sequência correta de terminais)
 
-**Este é o passo MAIS IMPORTANTE. Siga a ordem abaixo com terminais separados:**
+**Siga esta ordem em terminais separados:**
 
 #### Terminal 1️⃣: Alimentar o banco de dados
 
@@ -176,8 +191,7 @@ mkdir -p static/produtos
 # Carrega as imagens e alimenta o Milvus com embeddings
 python dsa_database.py
 
-# Você verá logs indicando que os dados estão sendo processados
-# Aguarde até ver mensagens como "Dados indexados com sucesso"
+# Aguarde até terminar a indexação
 ```
 
 #### Terminal 2️⃣: Iniciar a API FastAPI (MANTENHA ABERTO)
@@ -194,17 +208,14 @@ python -m uvicorn dsa_api:app --port 8000 --reload
 # Documentação interativa em http://localhost:8000/docs
 ```
 
-#### Terminal 3️⃣: Iniciar o Frontend Streamlit
+#### Terminal 3️⃣: Iniciar o Frontend Flask
 
 ```bash
 # Abra um NOVO terminal APÓS ver "Application startup complete" no Terminal 2
-# Caso contrário, a interface não conseguirá conectar à API
+python dsa_frontend.py
 
-streamlit run dsa_frontend.py
-
-# Você verá:
-# You can now view your Streamlit app in your browser.
-# Local URL: http://localhost:8501
+# O frontend será iniciado localmente em:
+# http://localhost:5000
 ```
 
 ### Resumo do Fluxo de Execução:
@@ -216,16 +227,16 @@ Terminal 1: python dsa_database.py
 Terminal 2: python -m uvicorn dsa_api:app --port 8000 --reload
             ↓ (aguarde "Application startup complete")
             
-Terminal 3: streamlit run dsa_frontend.py
-            ↓ (agora você pode acessar http://localhost:8501)
+Terminal 3: python dsa_frontend.py
+            ↓ (acesso em http://localhost:5000)
 ```
 
 ### ✅ Verificar se tudo está funcionando:
 
-1. **Terminal 1 (Database)**: Deve terminar sem erros
-2. **Terminal 2 (API)**: Deve exibir `Application startup complete`
-3. **Terminal 3 (Frontend)**: Deve exibir URL local (http://localhost:8501)
-4. **Browser**: Acesse http://localhost:8501 e faça upload de uma imagem
+1. **Terminal 1 (Database)**: deve terminar sem erros
+2. **Terminal 2 (API)**: deve exibir `Application startup complete`
+3. **Terminal 3 (Frontend)**: deve iniciar sem erros e exibir `http://localhost:5000`
+4. **Browser**: acesse http://localhost:5000 e faça upload de uma imagem
 
 ## 🔧 Componentes Principais
 
@@ -297,13 +308,25 @@ async def dsa_processa_image(file: UploadFile = File(...)):
     }
 ```
 
-### 3. `dsa_frontend.py` - Interface Streamlit
+### 3. `dsa_frontend.py` - Frontend Flask + HTML/CSS
 
 Interface web para testar o agente:
 - Upload de imagens
-- Visualização dos produtos encontrados
-- Exibição da resposta do agente
-- Scores de similaridade
+- Envio para a API FastAPI
+- Exibição do resultado do agente
+- Renderização do HTML com CSS e páginas de apoio
+
+A aplicação é iniciada com:
+
+```bash
+python dsa_frontend.py
+```
+
+E por padrão roda em:
+
+```bash
+http://localhost:5000
+```
 
 ### 4. `docker-compose.yml` - Orquestração
 
@@ -327,11 +350,11 @@ services:
 
 | Biblioteca | Versão | Uso |
 |-----------|--------|-----|
-| `fastapi` | 0.104+ | Framework web |
+| `fastapi` | 0.104+ | Framework web da API |
+| `flask` | 3.x | Frontend web |
 | `pymilvus` | 2.3+ | Cliente Milvus |
 | `langchain_ollama` | 0.1+ | LLM local |
 | `langgraph` | 0.1+ | Orquestração do agente |
-| `streamlit` | 1.28+ | Interface web |
 | `pillow` | 10+ | Processamento de imagens |
 | `sentence-transformers` | 3+ | Embeddings multimodais |
 
@@ -340,28 +363,27 @@ Ver `requirements.txt` para lista completa.
 ## 🔍 Fluxo Completo de Execução
 
 ```
-1. Usuário envia imagem de um produto
+1. Usuário envia imagem pela interface web (Flask)
    ↓
-2. FastAPI recebe e salva temporariamente
+2. Frontend salva a imagem localmente
    ↓
-3. Agente LangGraph inicia execução
+3. Flask envia a imagem para a API FastAPI
    ↓
-4. search_node():
+4. FastAPI executa o agente LangGraph
+   ↓
+5. search_node():
    - Gera embedding da imagem
    - Busca no Milvus
    - Retorna 2 produtos similares
    ↓
-5. sales_agent_node():
+6. sales_agent_node():
    - Monta prompt com produtos
    - Chama LLaMA 3 (Ollama)
    - Gera argumento de venda
    ↓
-6. API retorna JSON com:
-   - Resposta textual do agente
-   - Lista de produtos sugeridos
-   - Scores de similaridade
+7. API retorna JSON com resposta e produtos
    ↓
-7. Arquivo temporário é removido
+8. Frontend renderiza HTML/CSS com o resultado
 ```
 
 ## ⚙️ Configuração Avançada
@@ -479,11 +501,13 @@ Para dúvidas ou problemas:
 - Verifique a documentação do Milvus: https://milvus.io
 - Verifique a documentação do Ollama: https://ollama.ai
 - Verifique LangGraph: https://langchain-ai.github.io/langgraph/
+- Consulte o Flask: https://flask.palletsprojects.com/
 
 ## 🎓 Referências e Recursos
 
 - [Milvus Documentation](https://milvus.io/docs)
 - [FastAPI Documentation](https://fastapi.tiangolo.com/)
+- [Flask Documentation](https://flask.palletsprojects.com/)
 - [Ollama GitHub](https://github.com/ollama/ollama)
 - [LangGraph](https://langchain-ai.github.io/langgraph/)
 - [Multimodal RAG Patterns](https://docs.llamaindex.ai/en/stable/examples/multi_modal/)
