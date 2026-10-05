@@ -166,24 +166,66 @@ ls -la static/produtos/
 mkdir -p static/produtos
 ```
 
-### 6️⃣ Executar a API FastAPI
+### 6️⃣ Executar a Aplicação (Sequência de Terminais)
+
+**Este é o passo MAIS IMPORTANTE. Siga a ordem abaixo com terminais separados:**
+
+#### Terminal 1️⃣: Alimentar o banco de dados
 
 ```bash
-# Terminal 1: Executar a API
-python dsa_api.py
+# Carrega as imagens e alimenta o Milvus com embeddings
+python dsa_database.py
 
-# A API estará em http://localhost:8000
+# Você verá logs indicando que os dados estão sendo processados
+# Aguarde até ver mensagens como "Dados indexados com sucesso"
+```
+
+#### Terminal 2️⃣: Iniciar a API FastAPI (MANTENHA ABERTO)
+
+```bash
+# Inicie a API após o Terminal 1 terminar
+python -m uvicorn dsa_api:app --port 8000 --reload
+
+# Você verá algo como:
+# INFO:     Uvicorn running on http://127.0.0.1:8000
+# INFO:     Application startup complete
+
+# ⚠️ NÃO feche este terminal! Ele precisa ficar rodando
 # Documentação interativa em http://localhost:8000/docs
 ```
 
-### 7️⃣ (Opcional) Usar Interface Streamlit
+#### Terminal 3️⃣: Iniciar o Frontend Streamlit
 
 ```bash
-# Terminal 2: Executar o frontend
+# Abra um NOVO terminal APÓS ver "Application startup complete" no Terminal 2
+# Caso contrário, a interface não conseguirá conectar à API
+
 streamlit run dsa_frontend.py
+
+# Você verá:
+# You can now view your Streamlit app in your browser.
+# Local URL: http://localhost:8501
 ```
 
-Acesse `http://localhost:8501`
+### Resumo do Fluxo de Execução:
+
+```
+Terminal 1: python dsa_database.py
+            ↓ (aguarde terminar)
+            
+Terminal 2: python -m uvicorn dsa_api:app --port 8000 --reload
+            ↓ (aguarde "Application startup complete")
+            
+Terminal 3: streamlit run dsa_frontend.py
+            ↓ (agora você pode acessar http://localhost:8501)
+```
+
+### ✅ Verificar se tudo está funcionando:
+
+1. **Terminal 1 (Database)**: Deve terminar sem erros
+2. **Terminal 2 (API)**: Deve exibir `Application startup complete`
+3. **Terminal 3 (Frontend)**: Deve exibir URL local (http://localhost:8501)
+4. **Browser**: Acesse http://localhost:8501 e faça upload de uma imagem
 
 ## 🔧 Componentes Principais
 
@@ -398,6 +440,12 @@ ls -la static/produtos/
 ```bash
 # Use uma porta diferente
 python -m uvicorn dsa_api:app --port 8001
+```
+
+### Erro: "Frontend não consegue conectar à API"
+```bash
+# Verifique se o Terminal 2 (API) está com "Application startup complete"
+# Aguarde mais alguns segundos e recarregue o browser
 ```
 
 ## 📈 Melhorias Futuras
