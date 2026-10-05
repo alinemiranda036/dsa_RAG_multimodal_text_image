@@ -1,0 +1,26 @@
+# Dados do Milvus e do etcd gerados pelo docker-compose
+volumes/
+
+# Imagens enviadas pelo usuário na interface
+static/uploads/
+
+# Arquivos temporários criados pela API durante o processamento
+temp_*
+
+# Variáveis de ambiente
+.env
+
+# Ambientes virtuais
+venv/
+.venv/
+env/
+
+# Cache do Python
+__pycache__/
+*.pyc
+
+# Sistema operacional e editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
