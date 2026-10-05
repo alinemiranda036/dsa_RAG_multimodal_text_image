@@ -76,10 +76,11 @@ dsa_RAG_multimodal_text_image/
 │       └── JBL_Flip_6.png
 ├── docker-compose.yml      # Milvus standalone + etcd
 ├── requirements.txt        # Dependências Python (versões fixadas)
+├── .gitignore              # Arquivos e pastas que não vão para o repositório
 └── README.md
 ```
 
-Tudo o que o projeto precisa para rodar já está no repositório: basta clonar. Duas pastas são criadas automaticamente durante a execução e não fazem parte do repositório:
+Tudo o que o projeto precisa para rodar já está no repositório: basta clonar. Duas pastas são criadas automaticamente durante a execução e não fazem parte do repositório (estão no `.gitignore`):
 
 | Pasta | Criada por | Conteúdo |
 |-------|-----------|----------|
@@ -436,7 +437,11 @@ Já existe um container `milvus-standalone` ou `milvus-etcd` de outro projeto. R
 
 ## 📝 Licença
 
-Este projeto é fornecido como exemplo educacional.
+Projeto de Pós-Graduação, desenvolvido para fins de estudo e portfólio durante a Pós-Graduação em Engenharia de Dados para IA da Data Science Academy. Não possui licença de uso comercial.
+
+## 📞 Contato
+
+Dúvidas ou sugestões sobre o projeto? Entre em contato comigo: **aline.abm97@gmail.com**
 
 ## 🎓 Referências
 
