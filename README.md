@@ -73,13 +73,14 @@ dsa_RAG_multimodal_text_image/
 ├── dsa_frontend.py                # Interface Streamlit
 ├── docker-compose.yml             # Orchestração de containers (Milvus + etcd)
 ├── requirements.txt               # Dependências Python
-├── apsat_static/                 # Imagens do catálogo (não está no repositório)
+├── static/                        # Imagens do catálogo (não está no repositório)
+│   └── produtos/
 └── README.md                     # Este arquivo
 ```
 
 ## ⚠️ Importante: Dados Estáticos Não Inclusos
 
-Este repositório **não contém a pasta `apsat_static/`** que armazena as imagens do catálogo de produtos.
+Este repositório **não contém a pasta `static/`** que armazena as imagens do catálogo de produtos.
 
 ### Como adicionar os dados estáticos ao clonar:
 
@@ -90,17 +91,17 @@ cd dsa_RAG_multimodal_text_image
 
 # IMPORTANTE: você precisa adicionar a pasta de imagens
 # A estrutura esperada é:
-# apsat_static/
+# static/
 # ├── produtos/
 # │   ├── imagem_1.jpg
 # │   ├── imagem_2.jpg
 # │   └── ...
 
 # Se você tiver acesso aos arquivos, copie-os para:
-cp -r /caminho/da/pasta/apsat_static ./
+cp -r /caminho/da/pasta/static ./
 
 # Ou crie a estrutura manualmente:
-mkdir -p apsat_static/produtos
+mkdir -p static/produtos
 # e coloque as imagens lá
 ```
 
@@ -114,7 +115,7 @@ Observação: sem essa pasta, o projeto não consegue carregar o catálogo visua
 - Docker e Docker Compose (para Milvus + etcd)
 - Ollama instalado e rodando localmente
 - Modelo LLaMA 3 baixado no Ollama
-- Pasta `apsat_static/produtos/` com imagens de produtos
+- Pasta `static/produtos/` com imagens de produtos
 
 ### 2️⃣ Instalação
 
@@ -158,11 +159,11 @@ docker-compose logs -f
 ### 5️⃣ Preparar as Imagens de Produtos
 
 ```bash
-# Certifique-se de que você tem a pasta apsat_static com as imagens
-ls -la apsat_static/produtos/
+# Certifique-se de que você tem a pasta static com as imagens
+ls -la static/produtos/
 
 # Se não tiver, crie a estrutura e adicione suas imagens
-mkdir -p apsat_static/produtos
+mkdir -p static/produtos
 ```
 
 ### 6️⃣ Executar a API FastAPI
@@ -384,13 +385,13 @@ ollama pull llama3
 ollama list
 ```
 
-### Erro: "FileNotFoundError - apsat_static"
+### Erro: "FileNotFoundError - static"
 ```bash
 # Certifique-se que a pasta existe
-mkdir -p apsat_static/produtos
+mkdir -p static/produtos
 
 # Verifique o conteúdo
-ls -la apsat_static/produtos/
+ls -la static/produtos/
 ```
 
 ### Erro: "Port 8000 already in use"
