@@ -1,0 +1,240 @@
+# VisionShop AI - Guia de Execução
+
+Este arquivo reúne o passo a passo para executar o projeto de forma correta e alinhada com o README original do repositório.
+
+## 1) Pré-requisitos
+
+Antes de iniciar, certifique-se de ter instalado:
+
+- Python 3.10 ou superior
+- Docker Desktop e Docker Compose
+- Ollama instalado e em execução
+- A pasta `static/produtos/` com as imagens do catálogo
+
+> Importante: sem as imagens em `static/produtos`, o projeto não consegue carregar o banco visual de produtos.
+
+## 2) Clonar o repositório
+
+```bash
+git clone https://github.com/alinemiranda036/dsa_RAG_multimodal_text_image.git
+cd dsa_RAG_multimodal_text_image
+```
+
+## 3) Criar e ativar o ambiente virtual
+
+A criação do ambiente virtual não precisa usar o mesmo nome do arquivo de referência. O importante é criar um ambiente isolado e ativá-lo corretamente.
+
+### Opção recomendada: venv (genérica)
+
+```bash
+python -m venv .venv
+```
+
+Ativação:
+
+### Linux/macOS
+
+```bash
+source .venv/bin/activate
+```
+
+### Windows (PowerShell)
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+### Windows (CMD)
+
+```cmd
+.venv\Scripts\activate.bat
+```
+
+### Opção alternativa com Conda
+
+```bash
+conda create --name dsamebvp4 python=3.13
+conda activate dsamebvp4
+```
+
+> Se você preferir, pode usar qualquer nome de ambiente. O mais importante é que ele seja ativado antes de instalar as dependências.
+
+## 4) Instalar dependências
+
+```bash
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+## 5) Preparar o banco vetorial (Milvus)
+
+No diretório do projeto, execute:
+
+```bash
+docker-compose up -d
+```
+
+Se o seu ambiente usa o comando `docker compose`, também pode funcionar assim:
+
+```bash
+docker compose up -d
+```
+
+Verifique se o Milvus está funcionando:
+
+```bash
+curl http://localhost:9091/healthz
+```
+
+## 6) Preparar a pasta de imagens
+
+Crie a estrutura obrigatória:
+
+```bash
+mkdir -p static/produtos
+```
+
+Verifique se as imagens foram colocadas no diretório:
+
+```bash
+ls -la static/produtos/
+```
+
+## 7) Configurar o Ollama
+
+O projeto usa LLaMA 3 localmente via Ollama.
+
+Em um terminal separado, execute:
+
+```bash
+ollama serve
+```
+
+Em outro terminal, baixe o modelo:
+
+```bash
+ollama pull llama3
+```
+
+> Caso o modelo não esteja disponível, o sistema não consegue gerar a resposta de venda.
+
+## 8) Carregar o banco vetorial
+
+Em um terminal, com o ambiente virtual ativado, execute:
+
+```bash
+python dsa_database.py
+```
+
+Aguarde até o processo terminar de inserir/indexar os embeddings.
+
+## 9) Iniciar a API FastAPI
+
+Abra outro terminal, mantenha o ambiente virtual ativado e execute:
+
+```bash
+python -m uvicorn dsa_api:app --port 8000 --reload
+```
+
+Você deve ver algo como:
+
+```bash
+INFO:     Uvicorn running on http://127.0.0.1:8000
+INFO:     Application startup complete
+```
+
+> Importante: deixe este terminal aberto durante a execução da aplicação.
+
+## 10) Iniciar o frontend
+
+Abra um quarto terminal e execute:
+
+```bash
+python dsa_frontend.py
+```
+
+O frontend será iniciado em:
+
+```bash
+http://localhost:5000
+```
+
+## 11) Fluxo recomendado de execução
+
+Em ordem, em terminais separados:
+
+### Terminal 1 - Banco vetorial
+
+```bash
+docker-compose up -d
+python dsa_database.py
+```
+
+### Terminal 2 - API
+
+```bash
+python -m uvicorn dsa_api:app --port 8000 --reload
+```
+
+### Terminal 3 - Frontend
+
+```bash
+python dsa_frontend.py
+```
+
+## 12) Verificação final
+
+Confirme que tudo está funcionando:
+
+1. `docker-compose up -d` está com o Milvus funcionando
+2. `python dsa_database.py` terminou sem erro
+3. `uvicorn` mostra `Application startup complete`
+4. O frontend abre em `http://localhost:5000`
+5. O upload de uma imagem funciona no navegador
+
+## 13) Desativar o ambiente virtual (opcional)
+
+```bash
+deactivate
+```
+
+Se estiver usando conda:
+
+```bash
+conda deactivate
+conda remove --name dsamebvp4 --all
+```
+
+## 14) Troubleshooting
+
+### Erro: porta 8000 já em uso
+
+```bash
+python -m uvicorn dsa_api:app --port 8001 --reload
+```
+
+### Erro: `static` não encontrado
+
+```bash
+mkdir -p static/produtos
+ls -la static/produtos/
+```
+
+### Erro: modelo `llama3` não encontrado
+
+```bash
+ollama list
+ollama pull llama3
+```
+
+### Erro: Milvus sem conexão
+
+```bash
+docker ps | grep milvus
+docker-compose up -d
+curl http://localhost:9091/healthz
+```
+
+---
+
+Este guia foi validado em consonância com o README original do projeto e ajustado para deixar a criação e ativação do ambiente virtual mais clara, sem depender de um nome fixo específico.
